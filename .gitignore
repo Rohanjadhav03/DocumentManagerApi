@@ -1,0 +1,62 @@
+############################
+# Visual Studio / VS Code
+############################
+.vs/
+.vscode/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Folder-specific VS caches
+**/.vs/
+**/.vscode/
+
+
+############################
+# Build / Runtime Files
+############################
+bin/
+obj/
+Debug/
+Release/
+x64/
+x86/
+out/
+publish/
+
+# ASP.NET Core generated files
+wwwroot/
+node_modules/
+
+############################
+# NuGet Packages
+############################
+*.nupkg
+*.snupkg
+packages/
+*.nuget.props
+*.nuget.targets
+
+############################
+# Logs
+############################
+*.log
+
+############################
+# Config / Environment
+############################
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.local.json
+
+# DO NOT ignore:
+# appsettings.json  -> keep this (safe)
+# appsettings.Production.json -> keep
+
+############################
+# Rider / JetBrains
+############################
+.idea/
