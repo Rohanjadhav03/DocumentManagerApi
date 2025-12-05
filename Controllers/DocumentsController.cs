@@ -1,5 +1,6 @@
 ﻿using DocumentManagerApi.Data.Repositories;
 using DocumentManagerApi.Models;
+using DocumentManagerApi.Models.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -54,6 +55,47 @@ namespace DocumentManagerApi.Controllers
             var deleted = await _repo.DeleteAsync(id);
             if (deleted == 0) return NotFound();
             return NoContent();
+        }
+
+        [HttpPost("upload")]
+        public async Task<IActionResult> UploadDocument([FromForm] DocumentUploadRequest request)
+        {
+            // Validate caseId exists? (optional)
+
+            string? filePath = null;
+
+            if (request.File != null)
+            {
+                var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "UploadedFiles");
+
+                if (!Directory.Exists(folderPath))
+                    Directory.CreateDirectory(folderPath);
+
+                var uniqueName = Guid.NewGuid().ToString() + Path.GetExtension(request.File.FileName);
+                var finalPath = Path.Combine(folderPath, uniqueName);
+
+                using (var stream = new FileStream(finalPath, FileMode.Create))
+                {
+                    await request.File.CopyToAsync(stream);
+                }
+
+                filePath = finalPath;
+            }
+
+            var doc = new Document
+            {
+                CaseId = request.CaseId,
+                Title = request.Title,
+                Tags = request.Tags,
+                Content = request.Content,
+                CreatedBy = 1,
+                CreatedAt = DateTime.UtcNow,
+                FilePath = filePath
+            };
+
+            var id = await _repo.CreateAsync(doc);
+
+            return Ok(new { DocumentId = id, FileSavedAt = filePath });
         }
     }
 }

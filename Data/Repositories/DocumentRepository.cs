@@ -40,7 +40,8 @@ namespace DocumentManagerApi.Data.Repositories
                     Content = Convert.ToString(row["Content"]),
                     CreatedBy = Convert.ToInt32(row["CreatedBy"]),
                     CreatedAt = Convert.ToDateTime(row["CreatedAt"]),
-                    UpdatedAt = row["UpdatedAt"] == DBNull.Value ? null : (DateTime?)Convert.ToDateTime(row["UpdatedAt"])
+                    UpdatedAt = row["UpdatedAt"] == DBNull.Value ? null : (DateTime?)Convert.ToDateTime(row["UpdatedAt"]),
+                    FilePath = row["FilePath"] == DBNull.Value ? null : row["FilePath"].ToString(),
                 });
             }
             return list;
@@ -62,15 +63,16 @@ namespace DocumentManagerApi.Data.Repositories
                 Content = Convert.ToString(row["Content"]),
                 CreatedBy = Convert.ToInt32(row["CreatedBy"]),
                 CreatedAt = Convert.ToDateTime(row["CreatedAt"]),
-                UpdatedAt = row["UpdatedAt"] == DBNull.Value ? null : (DateTime?)Convert.ToDateTime(row["UpdatedAt"])
+                UpdatedAt = row["UpdatedAt"] == DBNull.Value ? null : (DateTime?)Convert.ToDateTime(row["UpdatedAt"]),
+                FilePath = row["FilePath"] == DBNull.Value ? null : row["FilePath"].ToString(),
             };
         }
 
         public async Task<int> CreateAsync(Document doc)
         {
-            var sql = @"INSERT INTO Documents (CaseId, Title, Tags, Content, CreatedBy, CreatedAt)
-                        VALUES (@CaseId, @Title, @Tags, @Content, @CreatedBy, @CreatedAt);
-                        SELECT SCOPE_IDENTITY();";
+            string sql = @"INSERT INTO Documents (CaseId, Title, Tags, Content, CreatedBy, FilePath)
+                   VALUES (@CaseId, @Title, @Tags, @Content, @CreatedBy, @FilePath);
+                   SELECT SCOPE_IDENTITY();";
 
             var result = await _db.ExecuteScalarAsync(sql,
                 new SqlParameter("@CaseId", SqlDbType.Int) { Value = doc.CaseId },
@@ -78,14 +80,15 @@ namespace DocumentManagerApi.Data.Repositories
                 new SqlParameter("@Tags", SqlDbType.NVarChar) { Value = (object?)doc.Tags ?? DBNull.Value },
                 new SqlParameter("@Content", SqlDbType.NVarChar) { Value = (object?)doc.Content ?? DBNull.Value },
                 new SqlParameter("@CreatedBy", SqlDbType.Int) { Value = doc.CreatedBy },
-                new SqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = doc.CreatedAt });
+                new SqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = doc.CreatedAt },
+                new SqlParameter("@FilePath", (object?)doc.FilePath ?? DBNull.Value));
 
             return Convert.ToInt32(result ?? 0);
         }
 
         public async Task<int> UpdateAsync(Document doc)
         {
-            var sql = @"UPDATE Documents SET CaseId=@CaseId, Title=@Title, Tags=@Tags, Content=@Content, UpdatedAt=@UpdatedAt
+            var sql = @"UPDATE Documents SET CaseId=@CaseId, Title=@Title, Tags=@Tags, Content=@Content, UpdatedAt=@UpdatedAt,FilePath=@FilePath
                         WHERE Id=@Id";
 
             return await _db.ExecuteNonQueryAsync(sql,
@@ -94,6 +97,7 @@ namespace DocumentManagerApi.Data.Repositories
                 new SqlParameter("@Tags", SqlDbType.NVarChar) { Value = (object?)doc.Tags ?? DBNull.Value },
                 new SqlParameter("@Content", SqlDbType.NVarChar) { Value = (object?)doc.Content ?? DBNull.Value },
                 new SqlParameter("@UpdatedAt", SqlDbType.DateTime) { Value = DateTime.UtcNow },
+                new SqlParameter("@FilePath", (object?)doc.FilePath ?? DBNull.Value),
                 new SqlParameter("@Id", SqlDbType.Int) { Value = doc.Id });
         }
 
